@@ -1,0 +1,46 @@
+scheme_id,scheme_name,keyword_type,keyword,path,date_range,rows_matched,count,min_ms,max_ms,avg_ms,p50_ms,p95_ms,p99_ms
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),common,string,,all,2153,200,843.606,7276.432,972.488,976.426,1061.609,1244.635
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),common,string,,7d,45,200,324.544,412.126,335.043,329.851,360.407,411.138
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),common,string,,24h,11,200,314.932,3973.948,341.852,318.680,350.393,370.933
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),rare,Service_with_tempated_csg,,all,0,200,885.009,1070.767,921.683,908.103,1013.835,1070.342
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),rare,Service_with_tempated_csg,,7d,0,200,334.057,412.173,348.069,339.771,389.186,409.406
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),rare,Service_with_tempated_csg,,24h,0,200,322.841,407.239,333.777,326.565,365.653,394.910
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),missing,1cc5c114-be8a-43ba-96c9-ad4146020e53,,all,0,200,847.075,1050.288,887.112,870.848,988.717,1047.385
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),missing,1cc5c114-be8a-43ba-96c9-ad4146020e53,,7d,0,200,326.253,430.675,333.548,329.471,354.775,380.441
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),missing,1cc5c114-be8a-43ba-96c9-ad4146020e53,,24h,0,200,315.322,7194.331,359.349,319.782,356.098,375.020
+v2,v2: JSON_SEARCH(),common,string,,all,2115,200,667.944,9584.408,916.217,886.207,948.170,1271.871
+v2,v2: JSON_SEARCH(),common,string,,7d,36,200,321.309,450.605,331.508,325.753,357.256,394.004
+v2,v2: JSON_SEARCH(),common,string,,24h,5,200,310.100,414.798,322.546,318.369,343.006,371.788
+v2,v2: JSON_SEARCH(),rare,Service_with_tempated_csg,,all,0,200,680.844,827.862,707.215,694.260,775.676,822.848
+v2,v2: JSON_SEARCH(),rare,Service_with_tempated_csg,,7d,0,200,320.571,462.584,336.920,326.982,385.300,437.047
+v2,v2: JSON_SEARCH(),rare,Service_with_tempated_csg,,24h,0,200,313.238,455.172,325.837,316.617,373.570,393.147
+v2,v2: JSON_SEARCH(),missing,1cc5c114-be8a-43ba-96c9-ad4146020e53,,all,0,200,680.459,853.718,707.766,694.305,770.153,846.147
+v2,v2: JSON_SEARCH(),missing,1cc5c114-be8a-43ba-96c9-ad4146020e53,,7d,0,200,320.606,435.090,344.263,337.390,391.121,429.903
+v2,v2: JSON_SEARCH(),missing,1cc5c114-be8a-43ba-96c9-ad4146020e53,,24h,0,200,311.950,7493.202,355.341,314.505,347.083,431.617
+v3,v3: ->> path extract (no index),path-value,cb4a86a6-58cb-11f1-985c-ee8b41bccb2e,$.id,all,1,200,435.675,642.000,452.257,445.260,481.810,622.518
+v3,v3: ->> path extract (no index),path-value,cb4a86a6-58cb-11f1-985c-ee8b41bccb2e,$.id,7d,1,200,313.760,7531.823,356.688,317.118,336.703,385.266
+v3,v3: ->> path extract (no index),path-value,cb4a86a6-58cb-11f1-985c-ee8b41bccb2e,$.id,24h,1,200,311.028,398.390,321.403,314.893,352.245,392.887
+v3,v3: ->> path extract (no index),path-value,bd99013d-5bd6-4469-9756-a130e729724a,$.orderId,all,0,200,430.417,737.185,461.575,452.229,511.973,651.549
+v3,v3: ->> path extract (no index),path-value,bd99013d-5bd6-4469-9756-a130e729724a,$.orderId,7d,0,200,315.376,1191.308,340.871,324.099,391.302,447.142
+v3,v3: ->> path extract (no index),path-value,bd99013d-5bd6-4469-9756-a130e729724a,$.orderId,24h,0,200,312.706,389.841,321.046,314.928,355.552,386.664
+v3,v3: ->> path extract (no index),path-value,136,$.companyId,all,7,200,437.141,625.455,452.340,444.471,482.550,519.395
+v3,v3: ->> path extract (no index),path-value,136,$.companyId,7d,2,200,311.678,405.778,321.693,316.589,347.140,394.029
+v3,v3: ->> path extract (no index),path-value,136,$.companyId,24h,2,200,308.371,367.469,316.668,311.988,339.770,351.656
+v4,v4: Generated column + B-tree index,path-value,cb4a86a6-58cb-11f1-985c-ee8b41bccb2e,$.id,all,1,200,308.827,393.122,319.927,311.722,357.988,384.796
+v4,v4: Generated column + B-tree index,path-value,cb4a86a6-58cb-11f1-985c-ee8b41bccb2e,$.id,7d,1,200,309.150,396.654,321.555,312.086,364.131,394.875
+v4,v4: Generated column + B-tree index,path-value,cb4a86a6-58cb-11f1-985c-ee8b41bccb2e,$.id,24h,1,200,308.796,407.642,315.960,311.349,339.858,397.372
+v4,v4: Generated column + B-tree index,path-value,a92cb526-d4e4-41b7-995c-ef0455714d24,$.orderId,all,0,200,308.654,420.165,321.819,311.720,380.740,405.891
+v4,v4: Generated column + B-tree index,path-value,a92cb526-d4e4-41b7-995c-ef0455714d24,$.orderId,7d,0,200,309.150,362.912,315.495,311.001,340.492,360.045
+v4,v4: Generated column + B-tree index,path-value,a92cb526-d4e4-41b7-995c-ef0455714d24,$.orderId,24h,0,200,309.135,396.327,319.474,311.450,362.187,394.089
+v4,v4: Generated column + B-tree index,path-value,136,$.companyId,all,7,200,309.165,1518.557,381.341,358.018,506.029,1005.080
+v4,v4: Generated column + B-tree index,path-value,136,$.companyId,7d,2,200,308.606,1848.423,338.490,319.618,382.829,536.920
+v4,v4: Generated column + B-tree index,path-value,136,$.companyId,24h,2,200,308.666,403.110,320.686,312.562,358.726,387.317
+v5,v5: Stringified column + FULLTEXT index,common,string,,all,2080,200,341.005,665.636,364.889,345.908,489.917,656.912
+v5,v5: Stringified column + FULLTEXT index,common,string,,7d,36,200,339.935,462.590,349.464,344.018,376.176,427.561
+v5,v5: Stringified column + FULLTEXT index,common,string,,24h,1,200,340.051,459.767,352.594,344.299,414.838,442.179
+v5,v5: Stringified column + FULLTEXT index,rare,Service_with_tempated_csg,,all,0,200,308.272,425.110,317.626,310.938,362.605,410.289
+v5,v5: Stringified column + FULLTEXT index,rare,Service_with_tempated_csg,,7d,0,200,308.979,417.689,316.279,310.527,361.929,403.325
+v5,v5: Stringified column + FULLTEXT index,rare,Service_with_tempated_csg,,24h,0,200,308.845,422.490,323.689,317.836,384.734,405.822
+v5,v5: Stringified column + FULLTEXT index,missing,1cc5c114-be8a-43ba-96c9-ad4146020e53,,all,0,200,316.224,394.901,321.103,317.615,337.377,392.061
+v5,v5: Stringified column + FULLTEXT index,missing,1cc5c114-be8a-43ba-96c9-ad4146020e53,,7d,0,200,316.360,410.493,322.741,317.988,353.660,408.752
+v5,v5: Stringified column + FULLTEXT index,missing,1cc5c114-be8a-43ba-96c9-ad4146020e53,,24h,0,200,316.199,424.986,323.189,318.102,358.304,417.681

@@ -75,10 +75,10 @@ Audit Log 从 `portalBackend` 抽到独立 NestJS service）之前，我们想
    `audit_logs_bench_v5`），从源表复制全部数据，然后应用方案特定的
    schema 改动（v4 的生成列+索引、v5 的字符串化列+FULLTEXT 索引）。
    **幂等**——重复跑安全。
-3. **`bench:read`** — 对每个 方案 × keyword × 时间范围，跑 `WARMUP`
+3. **`bench:read`** — 测每个方案的搜索快不快。对每个 方案 × keyword × 时间范围，跑 `WARMUP`
    次预热（丢弃）+ `ITERATIONS` 次测量。记录 P50 / P95 / P99，并对每
    个组合跑一次 `EXPLAIN ANALYZE` 收入报告。
-4. **`bench:write`** — 向每个姐妹表插入 `WRITE_ITERATIONS` 条合成数据，
+4. **`bench:write`** — 测每个方案的写入代价多大。向每个姐妹表插入 `WRITE_ITERATIONS` 条合成数据，
    记录 inserts/sec。测试数据跑完会删除，保证 read benchmark 不受影响。
 5. **`teardown`** — drop 所有姐妹表。默认 `KEEP_BENCH_TABLES=true` 时
    跳过，方便不重新 setup 再跑。

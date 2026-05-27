@@ -1,0 +1,66 @@
+{
+  "env": {
+    "mysqlVersion": "8.4.8",
+    "database": "portal",
+    "sourceTable": "audit_logs",
+    "sourceTableRows": 76635,
+    "bodyAvgBytes": 1223.7224,
+    "bodyMaxBytes": 2696431,
+    "sampleTenant": "lotusflaretelecom",
+    "sampleTenantRows": 45109,
+    "benchTablePrefix": "audit_logs_bench_",
+    "jsonPaths": [
+      "$.id",
+      "$.orderId",
+      "$.companyId"
+    ],
+    "iterations": 2000,
+    "warmup": 0,
+    "runStartedAt": "2026-05-27T10:23:24.108Z",
+    "runFinishedAt": "2026-05-27T11:17:45.732Z"
+  },
+  "reads": [],
+  "writes": [
+    {
+      "schemeId": "v1",
+      "schemeName": "v1: CAST(JSON AS CHAR) + LIKE (baseline)",
+      "insertsAttempted": 2000,
+      "elapsedMs": 644213,
+      "insertsPerSec": 3.104563242281668,
+      "storageBytes": 0
+    },
+    {
+      "schemeId": "v2",
+      "schemeName": "v2: JSON_SEARCH()",
+      "insertsAttempted": 2000,
+      "elapsedMs": 648048,
+      "insertsPerSec": 3.0861911463348393,
+      "storageBytes": 0
+    },
+    {
+      "schemeId": "v3",
+      "schemeName": "v3: ->> path extract (no index)",
+      "insertsAttempted": 2000,
+      "elapsedMs": 652957,
+      "insertsPerSec": 3.062988833874206,
+      "storageBytes": 0
+    },
+    {
+      "schemeId": "v4",
+      "schemeName": "v4: Generated column + B-tree index",
+      "insertsAttempted": 2000,
+      "elapsedMs": 651620,
+      "insertsPerSec": 3.069273502961849,
+      "storageBytes": 0
+    },
+    {
+      "schemeId": "v5",
+      "schemeName": "v5: Stringified column + FULLTEXT index",
+      "insertsAttempted": 2000,
+      "elapsedMs": 658619,
+      "insertsPerSec": 3.0366570050362953,
+      "storageBytes": 0
+    }
+  ],
+  "autoConclusion": "> Heuristic interpretation (date_range=all, worst-case P95 per scheme).\n\n\n> Write throughput impact (baseline v1 = 3 inserts/sec).\n\n- **v2**: 3 inserts/sec (-0.6% vs baseline)\n- **v3**: 3 inserts/sec (-1.3% vs baseline)\n- **v4**: 3 inserts/sec (-1.1% vs baseline)\n- **v5**: 3 inserts/sec (-2.2% vs baseline)"
+}

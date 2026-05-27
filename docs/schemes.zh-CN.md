@@ -2,6 +2,9 @@
 
 > 🇬🇧 [English version](./schemes.md)
 >
+> 配套文档：[`keywords.zh-CN.md`](./keywords.zh-CN.md)（为什么读 benchmark
+> 要分三种关键词桶）、[`methodology.md`](./methodology.md)（整体测试方法学）。
+>
 > 👋 **第一次接触这个项目？** 请先读这篇。它是整套 benchmark 的概念基础，
 > README 里只给一行简介，真正决定推荐结论的所有 trade-off 都在这里。
 

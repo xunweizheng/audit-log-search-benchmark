@@ -14,15 +14,22 @@ export interface KeywordSet {
  * Pull a sample of requestBody documents from the source table and harvest
  * candidate keywords from them. We use these to make the read benchmark
  * meaningful: testing high-cardinality vs low-cardinality vs zero-hit queries.
+ *
+ * Implementation note: we use `ORDER BY id DESC LIMIT N` rather than the more
+ * obvious `ORDER BY RAND() LIMIT N`. The latter is a well-known anti-pattern
+ * because MySQL must materialize every candidate row into the sort buffer
+ * before picking N — with `requestBody` rows up to several MB each, that
+ * blows past sort_buffer_size and fails with "Out of sort memory". Reading
+ * the most recent N rows is also more representative for keyword sampling.
  */
 export async function autoSampleKeywords(tenant: string | null, sampleSize = 500): Promise<KeywordSet> {
-    log.info(`Auto-sampling up to ${sampleSize} requestBody rows to derive keywords...`);
+    log.info(`Sampling latest ${sampleSize} requestBody rows to derive keywords...`);
 
     const tenantFilter = tenant ? `AND tenant = ${escapeStringLiteral(tenant)}` : '';
     const rows = await query<{ requestBody: unknown }>(
         `SELECT requestBody FROM ${config.sourceTable}
          WHERE requestBody IS NOT NULL ${tenantFilter}
-         ORDER BY RAND()
+         ORDER BY id DESC
          LIMIT ${sampleSize}`
     );
 
@@ -75,7 +82,14 @@ export async function resolveKeywords(tenant: string | null): Promise<KeywordSet
  * Pick a few real, non-null values for a JSON path. Used to seed
  * benchmark queries for the path-extract / generated-column schemes.
  * Falls back to a random UUID (which won't be found) when no row has the path.
+ *
+ * Same anti-pattern caveat as autoSampleKeywords: `ORDER BY RAND()` would
+ * blow up sort_buffer_size on tables with multi-MB JSON rows. We scan the
+ * latest SCAN_LIMIT rows (cheap, index-driven), then pick the first `count`
+ * non-empty values from them.
  */
+const PATH_SAMPLE_SCAN_LIMIT = 1000;
+
 export async function samplePathValues(
     table: string,
     tenant: string | null,
@@ -84,17 +98,20 @@ export async function samplePathValues(
 ): Promise<string[]> {
     const tenantFilter = tenant ? `AND tenant = ${escapeStringLiteral(tenant)}` : '';
     const rows = await query<{ v: string | null }>(
-        `SELECT requestBody->>'${jsonPath}' AS v FROM ${table}
-         WHERE requestBody IS NOT NULL ${tenantFilter}
-           AND requestBody->>'${jsonPath}' IS NOT NULL
-           AND requestBody->>'${jsonPath}' <> ''
-         ORDER BY RAND()
+        `SELECT v FROM (
+            SELECT requestBody->>'${jsonPath}' AS v
+            FROM ${table}
+            WHERE requestBody IS NOT NULL ${tenantFilter}
+            ORDER BY id DESC
+            LIMIT ${PATH_SAMPLE_SCAN_LIMIT}
+         ) t
+         WHERE v IS NOT NULL AND v <> ''
          LIMIT ${count}`
     );
     const values = rows.map(r => r.v).filter((v): v is string => v !== null && v !== '');
     if (values.length === 0) {
         log.warn(
-            `No non-null values found for ${jsonPath} in ${table} — using random UUIDs (zero hits expected)`
+            `No non-null values found for ${jsonPath} in ${table} (scanned latest ${PATH_SAMPLE_SCAN_LIMIT} rows) — using random UUIDs (zero hits expected)`
         );
         return [randomUUID(), randomUUID()];
     }

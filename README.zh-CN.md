@@ -219,6 +219,8 @@ audit-log-search-benchmark/
 └── docs/
     ├── schemes.md           # 🌟 5 方案深度解析（英文）—— 先读
     ├── schemes.zh-CN.md     # 🌟 5 方案深度解析（中文）
+    ├── keywords.md          # 关键词分桶（common/rare/missing）的设计解读（英文）
+    ├── keywords.zh-CN.md    # 同上，中文版
     └── methodology.md       # 方法学补充
 ```
 
@@ -259,5 +261,8 @@ GROUP BY v ORDER BY COUNT(*) DESC LIMIT 5;
 
 - **[`docs/schemes.zh-CN.md`](./docs/schemes.zh-CN.md)** — 5 方案
   深度解析，含 SQL 示例、优缺点、用户场景映射。**先读这个**。
+- [`docs/keywords.zh-CN.md`](./docs/keywords.zh-CN.md) — 读 benchmark
+  为什么要分三种关键词桶（common / rare / missing），以及怎么从每个
+  方案在三桶上的表现读出它的性能特征。
 - [`docs/methodology.md`](./docs/methodology.md) — 为什么不用 sysbench、
   为什么要预热、为什么测 P95、我们不测什么以及为什么不测。

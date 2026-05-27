@@ -2,6 +2,10 @@
 
 > 🇨🇳 [中文版 / Chinese version](./schemes.zh-CN.md)
 >
+> Companion docs: [`keywords.md`](./keywords.md) (why the read benchmark uses
+> three keyword buckets), [`methodology.md`](./methodology.md) (broader
+> measurement design).
+>
 > 👋 **New to this project?** Read this document first. It's the conceptual
 > foundation everything else builds on. The READMEs only give you a one-line
 > summary; the trade-offs that drive the recommendation live here.

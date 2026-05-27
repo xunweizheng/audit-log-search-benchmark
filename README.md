@@ -232,6 +232,8 @@ audit-log-search-benchmark/
 └── docs/
     ├── schemes.md           # 🌟 deep dive of the 5 schemes (English) — read first
     ├── schemes.zh-CN.md     # 🌟 deep dive of the 5 schemes (Chinese)
+    ├── keywords.md          # why the read benchmark uses common/rare/missing buckets (EN)
+    ├── keywords.zh-CN.md    # same, Chinese
     └── methodology.md       # extra notes on methodology
 ```
 
@@ -276,6 +278,9 @@ for speed.
 
 - **[`docs/schemes.md`](./docs/schemes.md)** — deep dive of each scheme,
   with SQL examples, pros / cons and user-intent mapping. **Start here.**
+- [`docs/keywords.md`](./docs/keywords.md) — why the read benchmark uses
+  three keyword buckets (common / rare / missing) and how to read each
+  scheme's behavior across them.
 - [`docs/methodology.md`](./docs/methodology.md) — why we don't use
   sysbench, why warmup matters, why we measure P95, what we don't
   measure and why.

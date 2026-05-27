@@ -82,3 +82,40 @@ export async function indexExists(tableName: string, indexName: string): Promise
     );
     return rows.length > 0;
 }
+
+/**
+ * Returns the list of columns on a table that are NOT generated columns.
+ *
+ * Why this exists: `INSERT INTO sibling SELECT * FROM source` blows up when
+ * the source table has GENERATED columns, because the SELECT pulls those
+ * generated values and MySQL refuses to let us assign them on the target
+ * (the target re-computes them itself). We use this helper to issue an
+ * explicit column list in both the INSERT and the SELECT clause.
+ *
+ * Generated columns are identified by the `EXTRA` field in information_schema
+ * containing the substring "GENERATED" (covers both STORED and VIRTUAL).
+ */
+export async function getNonGeneratedColumns(tableName: string): Promise<string[]> {
+    const rows = await query<{ COLUMN_NAME: string; EXTRA: string | null }>(
+        `SELECT COLUMN_NAME, EXTRA
+         FROM information_schema.columns
+         WHERE table_schema = ? AND table_name = ?
+         ORDER BY ORDINAL_POSITION`,
+        [config.db.database, tableName]
+    );
+    return rows
+        .filter(r => !/GENERATED/i.test(r.EXTRA ?? ''))
+        .map(r => r.COLUMN_NAME);
+}
+
+/**
+ * Count rows in a table. Used to detect "table exists but is empty" so that
+ * a re-run of setup after a partial failure can resume and copy data.
+ */
+export async function countRows(tableName: string): Promise<number> {
+    const rows = await query<{ n: unknown }>(`SELECT COUNT(*) AS n FROM ${tableName}`);
+    const raw = rows[0]?.n;
+    if (raw === null || raw === undefined) return 0;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : 0;
+}

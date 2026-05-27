@@ -14,6 +14,7 @@ import path from 'node:path';
 import { config } from './lib/config.js';
 import { closeConnection, getConnection, query } from './lib/db.js';
 import { log } from './lib/logger.js';
+import { toNum } from './lib/num.js';
 import {
     type BenchReport,
     type EnvSnapshot,
@@ -24,12 +25,12 @@ import {
 import { schemes } from './lib/schemes.js';
 
 interface MaxIdRow {
-    max_id: number | null;
+    max_id: unknown;
 }
 
 interface SizeRow {
-    data_length: number;
-    index_length: number;
+    data_length: unknown;
+    index_length: unknown;
 }
 
 async function main(): Promise<void> {
@@ -44,7 +45,9 @@ async function main(): Promise<void> {
         const [{ max_id: beforeMax }] = await query<MaxIdRow>(
             `SELECT MAX(id) AS max_id FROM ${scheme.table}`
         );
-        const safeBefore = beforeMax ?? 0;
+        // MAX(id) can come back as a JS string for BIGINT-promoted results;
+        // toNum normalizes that. Fallback 0 handles an empty table.
+        const safeBefore = toNum(beforeMax, 0);
 
         const conn = await getConnection();
         const t0 = Date.now();
@@ -93,7 +96,9 @@ async function main(): Promise<void> {
             insertsAttempted: config.writeIterations,
             elapsedMs,
             insertsPerSec,
-            storageBytes: size ? size.data_length + size.index_length : 0,
+            // BIGINT columns can be returned as strings; "12+34" would otherwise
+            // do string concatenation instead of arithmetic.
+            storageBytes: size ? toNum(size.data_length) + toNum(size.index_length) : 0,
         });
 
         // Clean up bench rows so read benchmarks remain comparable.
@@ -137,9 +142,9 @@ function buildSyntheticBody(): Record<string, unknown> {
 async function snapshotEnv(): Promise<EnvSnapshot> {
     const [v] = await query<{ v: string }>(`SELECT VERSION() AS v`);
     const [stats] = await query<{
-        total_rows: number;
-        avg_bytes: number | null;
-        max_bytes: number | null;
+        total_rows: unknown;
+        avg_bytes: unknown;
+        max_bytes: unknown;
     }>(
         `SELECT COUNT(*) AS total_rows,
                 AVG(LENGTH(requestBody)) AS avg_bytes,
@@ -149,13 +154,13 @@ async function snapshotEnv(): Promise<EnvSnapshot> {
 
     let tenant = config.sampleTenant;
     if (!tenant) {
-        const tenants = await query<{ tenant: string; n: number }>(
+        const tenants = await query<{ tenant: string; n: unknown }>(
             `SELECT tenant, COUNT(*) AS n FROM ${config.sourceTable}
              GROUP BY tenant ORDER BY n DESC LIMIT 1`
         );
         tenant = tenants[0]?.tenant ?? 'unknown';
     }
-    const [tcount] = await query<{ n: number }>(
+    const [tcount] = await query<{ n: unknown }>(
         `SELECT COUNT(*) AS n FROM ${config.sourceTable} WHERE tenant = ?`,
         [tenant]
     );
@@ -164,11 +169,11 @@ async function snapshotEnv(): Promise<EnvSnapshot> {
         mysqlVersion: v.v,
         database: config.db.database,
         sourceTable: config.sourceTable,
-        sourceTableRows: stats.total_rows,
-        bodyAvgBytes: stats.avg_bytes ?? 0,
-        bodyMaxBytes: stats.max_bytes ?? 0,
+        sourceTableRows: toNum(stats.total_rows),
+        bodyAvgBytes: toNum(stats.avg_bytes),
+        bodyMaxBytes: toNum(stats.max_bytes),
         sampleTenant: tenant,
-        sampleTenantRows: tcount.n,
+        sampleTenantRows: toNum(tcount.n),
         benchTablePrefix: config.benchTablePrefix,
         jsonPaths: config.jsonPaths,
         iterations: config.writeIterations,

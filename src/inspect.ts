@@ -5,33 +5,36 @@
 import { config } from './lib/config.js';
 import { closeConnection, query } from './lib/db.js';
 import { log } from './lib/logger.js';
+import { toNum, toNumOrNull } from './lib/num.js';
 
 interface VersionRow {
     version: string;
 }
 
+// MySQL returns AVG/SUM/DECIMAL/BIGINT as JS strings to avoid precision loss,
+// so DB row fields stay `unknown` and we normalize with toNum at use sites.
 interface StatsRow {
-    total_rows: number;
-    avg_bytes: number | null;
-    max_bytes: number | null;
-    total_mb: number | null;
+    total_rows: unknown;
+    avg_bytes: unknown;
+    max_bytes: unknown;
+    total_mb: unknown;
 }
 
 interface TenantRow {
     tenant: string;
-    n: number;
+    n: unknown;
 }
 
 interface SpaceRow {
-    data_mb: number;
-    index_mb: number;
+    data_mb: unknown;
+    index_mb: unknown;
 }
 
 interface IndexRow {
     Key_name: string;
     Seq_in_index: number;
     Column_name: string;
-    Cardinality: number;
+    Cardinality: unknown;
 }
 
 async function main(): Promise<void> {
@@ -56,9 +59,10 @@ async function main(): Promise<void> {
                 SUM(LENGTH(requestBody)) / 1024 / 1024 AS total_mb
          FROM ${config.sourceTable}`
     );
-    log.info(`Total rows: ${stats.total_rows.toLocaleString()}`);
-    log.info(`requestBody avg/max: ${fmtBytes(stats.avg_bytes)} / ${fmtBytes(stats.max_bytes)}`);
-    log.info(`requestBody total stored: ${(stats.total_mb ?? 0).toFixed(2)} MB`);
+    const totalRows = toNum(stats.total_rows);
+    log.info(`Total rows: ${totalRows.toLocaleString()}`);
+    log.info(`requestBody avg/max: ${fmtBytes(toNumOrNull(stats.avg_bytes))} / ${fmtBytes(toNumOrNull(stats.max_bytes))}`);
+    log.info(`requestBody total stored: ${toNum(stats.total_mb).toFixed(2)} MB`);
 
     const space = await query<SpaceRow>(
         `SELECT ROUND(data_length/1024/1024, 2) AS data_mb,
@@ -68,7 +72,9 @@ async function main(): Promise<void> {
         [config.db.database, config.sourceTable]
     );
     if (space.length > 0) {
-        log.info(`Table size: data ${space[0].data_mb} MB, indexes ${space[0].index_mb} MB`);
+        log.info(
+            `Table size: data ${toNum(space[0].data_mb).toFixed(2)} MB, indexes ${toNum(space[0].index_mb).toFixed(2)} MB`
+        );
     }
 
     log.step('Top tenants by row count');
@@ -80,7 +86,7 @@ async function main(): Promise<void> {
          LIMIT 10`
     );
     for (const t of tenants) {
-        log.sub(`${t.tenant.padEnd(40)} ${t.n.toLocaleString()} rows`);
+        log.sub(`${t.tenant.padEnd(40)} ${toNum(t.n).toLocaleString()} rows`);
     }
     if (!config.sampleTenant) {
         log.info(`SAMPLE_TENANT is empty in .env — will auto-pick: ${tenants[0]?.tenant ?? '<none>'}`);
@@ -116,11 +122,11 @@ async function main(): Promise<void> {
     await closeConnection();
 }
 
-function fmtBytes(n: number | null): string {
-    if (n === null) return 'N/A';
-    if (n >= 1024 * 1024) return `${(n / 1024 / 1024).toFixed(2)} MB`;
-    if (n >= 1024) return `${(n / 1024).toFixed(2)} KB`;
-    return `${Math.round(n)} B`;
+function fmtBytes(value: number | null): string {
+    if (value === null || !Number.isFinite(value)) return 'N/A';
+    if (value >= 1024 * 1024) return `${(value / 1024 / 1024).toFixed(2)} MB`;
+    if (value >= 1024) return `${(value / 1024).toFixed(2)} KB`;
+    return `${Math.round(value)} B`;
 }
 
 main().catch(err => {

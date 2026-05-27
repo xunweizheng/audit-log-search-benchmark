@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import { toNum } from './num.js';
 import type { Stats } from './timer.js';
 import { fmtMs } from './timer.js';
 
@@ -211,10 +212,12 @@ function toMarkdown(report: BenchReport): string {
 }
 
 function humanBytes(bytes: number): string {
-    if (bytes >= 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`;
-    if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
-    if (bytes >= 1024) return `${(bytes / 1024).toFixed(2)} KB`;
-    return `${bytes} B`;
+    // Coerce defensively — callers may forward DB-returned BIGINT strings.
+    const n = toNum(bytes);
+    if (n >= 1024 * 1024 * 1024) return `${(n / 1024 / 1024 / 1024).toFixed(2)} GB`;
+    if (n >= 1024 * 1024) return `${(n / 1024 / 1024).toFixed(2)} MB`;
+    if (n >= 1024) return `${(n / 1024).toFixed(2)} KB`;
+    return `${Math.round(n)} B`;
 }
 
 function truncate(s: string, n: number): string {

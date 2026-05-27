@@ -15,6 +15,7 @@ import { config } from './lib/config.js';
 import { closeConnection, getConnection, query } from './lib/db.js';
 import { resolveKeywords, samplePathValues } from './lib/keywords.js';
 import { log } from './lib/logger.js';
+import { toNum } from './lib/num.js';
 import {
     type BenchReport,
     type EnvSnapshot,
@@ -27,7 +28,7 @@ import { type DateRange, type Scheme, dateRanges, schemes } from './lib/schemes.
 import { computeStats, fmtMs, timeRepeated } from './lib/timer.js';
 
 interface CountRow {
-    n: number;
+    n: unknown;
 }
 
 async function main(): Promise<void> {
@@ -169,9 +170,9 @@ async function captureExplain(sql: string, params: unknown[]): Promise<string | 
 async function snapshotEnv(): Promise<EnvSnapshot> {
     const [v] = await query<{ v: string }>(`SELECT VERSION() AS v`);
     const [stats] = await query<{
-        total_rows: number;
-        avg_bytes: number | null;
-        max_bytes: number | null;
+        total_rows: unknown;
+        avg_bytes: unknown;
+        max_bytes: unknown;
     }>(
         `SELECT COUNT(*) AS total_rows,
                 AVG(LENGTH(requestBody)) AS avg_bytes,
@@ -181,7 +182,7 @@ async function snapshotEnv(): Promise<EnvSnapshot> {
 
     let tenant = config.sampleTenant;
     if (!tenant) {
-        const tenants = await query<{ tenant: string; n: number }>(
+        const tenants = await query<{ tenant: string; n: unknown }>(
             `SELECT tenant, COUNT(*) AS n FROM ${config.sourceTable}
              GROUP BY tenant ORDER BY n DESC LIMIT 1`
         );
@@ -196,11 +197,11 @@ async function snapshotEnv(): Promise<EnvSnapshot> {
         mysqlVersion: v.v,
         database: config.db.database,
         sourceTable: config.sourceTable,
-        sourceTableRows: stats.total_rows,
-        bodyAvgBytes: stats.avg_bytes ?? 0,
-        bodyMaxBytes: stats.max_bytes ?? 0,
+        sourceTableRows: toNum(stats.total_rows),
+        bodyAvgBytes: toNum(stats.avg_bytes),
+        bodyMaxBytes: toNum(stats.max_bytes),
         sampleTenant: tenant,
-        sampleTenantRows: tcount.n,
+        sampleTenantRows: toNum(tcount.n),
         benchTablePrefix: config.benchTablePrefix,
         jsonPaths: config.jsonPaths,
         iterations: config.iterations,

@@ -1,0 +1,4 @@
+# Benchmark reports land here.
+# Files matching reports/run-*.{md,json,csv} are committed so the run history
+# stays reviewable. If a report ever contains sensitive data, gitignore it
+# explicitly in the root .gitignore.

@@ -1,0 +1,29 @@
+node_modules/
+dist/
+
+# Local environment files — never commit credentials
+.env
+.env.local
+.env.*.local
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor folders
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
+# Optional cache
+.cache/
+
+# Reports are intentionally committed so the history of runs is reviewable.
+# If a report ever contains sensitive data, gitignore it explicitly here.

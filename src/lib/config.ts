@@ -21,6 +21,7 @@ export interface BenchConfig {
     iterations: number;
     warmup: number;
     writeIterations: number;
+    writeBatchSize: number;
     sampleTenant: string | null;
     jsonPaths: string[];
     keywords: KeywordOverrides;
@@ -78,6 +79,11 @@ export const config: BenchConfig = {
     iterations: parseInt10('ITERATIONS', 200),
     warmup: parseInt10('WARMUP', 5),
     writeIterations: parseInt10('WRITE_ITERATIONS', 2000),
+    // Number of rows per multi-row INSERT in the write benchmark. Larger
+    // batches amortize network round-trip cost so the wall-clock time
+    // reflects actual MySQL write work; smaller batches mimic the
+    // single-row INSERT pattern. Default of 50 strikes a good balance.
+    writeBatchSize: parseInt10('WRITE_BATCH_SIZE', 50),
     sampleTenant: process.env.SAMPLE_TENANT?.trim() || null,
     jsonPaths: parseList(process.env.JSON_PATHS) || ['$.id', '$.orderId', '$.companyId'],
     keywords: {

@@ -123,8 +123,15 @@ npm run teardown      # 5) （可选）清理姐妹表
 npm run all
 ```
 
-报告写到 `reports/run-<时间戳>.{md,json,csv}`，**有意提交进 git**，
-方便回看历史。
+报告写到 `reports/run-<时间戳>-<phase>.{md,json,csv}`，`<phase>` 是
+`read` / `write` / `combined` 之一：
+
+- `npm run bench:read`  → `run-<时间戳>-read.{md,json,csv}`
+- `npm run bench:write` → `run-<时间戳>-write.{md,json,csv}`
+- `npm run all`         → 上述两份加上合并的
+  `run-<时间戳>-combined.{md,json,csv}`，同时包含读和写的数据。
+
+报告**有意提交进 git**，方便回看历史。
 
 ---
 
@@ -140,6 +147,7 @@ npm run all
 | `ITERATIONS` | 每个查询的测量次数 | `200` |
 | `WARMUP` | 每个查询的预热次数（丢弃） | `5` |
 | `WRITE_ITERATIONS` | 每个方案写入测试的 insert 数 | `2000` |
+| `WRITE_BATCH_SIZE` | 每条 multi-row INSERT 的行数；越大越能摆脱网络瓶颈 | `50` |
 | `SAMPLE_TENANT` | 用哪个 tenant 跑。留空 = 自动选行数最多的 | 空 |
 | `JSON_PATHS` | v3、v4 用的 path | `$.id,$.orderId,$.companyId` |
 | `KEYWORDS_COMMON` / `KEYWORDS_RARE` / `KEYWORDS_MISSING` | 覆盖自动采样 | 空（自动） |

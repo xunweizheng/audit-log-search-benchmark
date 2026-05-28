@@ -1,0 +1,66 @@
+{
+  "env": {
+    "mysqlVersion": "8.4.8",
+    "database": "portal",
+    "sourceTable": "audit_logs",
+    "sourceTableRows": 76647,
+    "bodyAvgBytes": 1223.5426,
+    "bodyMaxBytes": 2696431,
+    "sampleTenant": "lotusflaretelecom",
+    "sampleTenantRows": 45121,
+    "benchTablePrefix": "audit_logs_bench_",
+    "jsonPaths": [
+      "$.id",
+      "$.orderId",
+      "$.companyId"
+    ],
+    "iterations": 2000,
+    "warmup": 0,
+    "runStartedAt": "2026-05-27T13:01:23.147Z",
+    "runFinishedAt": "2026-05-27T13:02:53.007Z"
+  },
+  "reads": [],
+  "writes": [
+    {
+      "schemeId": "v1",
+      "schemeName": "v1: CAST(JSON AS CHAR) + LIKE (baseline)",
+      "insertsAttempted": 2000,
+      "elapsedMs": 16496,
+      "insertsPerSec": 121.24151309408343,
+      "storageBytes": 0
+    },
+    {
+      "schemeId": "v2",
+      "schemeName": "v2: JSON_SEARCH()",
+      "insertsAttempted": 2000,
+      "elapsedMs": 14864,
+      "insertsPerSec": 134.55328310010765,
+      "storageBytes": 0
+    },
+    {
+      "schemeId": "v3",
+      "schemeName": "v3: ->> path extract (no index)",
+      "insertsAttempted": 2000,
+      "elapsedMs": 15036,
+      "insertsPerSec": 133.01409949454643,
+      "storageBytes": 0
+    },
+    {
+      "schemeId": "v4",
+      "schemeName": "v4: Generated column + B-tree index",
+      "insertsAttempted": 2000,
+      "elapsedMs": 14484,
+      "insertsPerSec": 138.08340237503452,
+      "storageBytes": 0
+    },
+    {
+      "schemeId": "v5",
+      "schemeName": "v5: Stringified column + FULLTEXT index",
+      "insertsAttempted": 2000,
+      "elapsedMs": 22912,
+      "insertsPerSec": 87.2905027932961,
+      "storageBytes": 0
+    }
+  ],
+  "autoConclusion": "> Heuristic interpretation (date_range=all, worst-case P95 per scheme).\n\n\n> Write throughput impact (baseline v1 = 121 inserts/sec).\n\n- **v2**: 135 inserts/sec (11.0% vs baseline)\n- **v3**: 133 inserts/sec (9.7% vs baseline)\n- **v4**: 138 inserts/sec (13.9% vs baseline)\n- **v5**: 87 inserts/sec (-28.0% vs baseline)"
+}

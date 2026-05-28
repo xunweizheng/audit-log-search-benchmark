@@ -33,8 +33,11 @@ interface SizeRow {
     index_length: unknown;
 }
 
-async function main(): Promise<void> {
+async function main(): Promise<BenchReport> {
     log.step('Write benchmark');
+    log.info(
+        `Inserting ${config.writeIterations.toLocaleString()} rows per scheme in batches of ${config.writeBatchSize}`
+    );
 
     const env = await snapshotEnv();
     const results: WriteResult[] = [];
@@ -51,33 +54,50 @@ async function main(): Promise<void> {
 
         const conn = await getConnection();
         const t0 = Date.now();
+        let insertedSoFar = 0;
         try {
-            for (let i = 0; i < config.writeIterations; i++) {
-                const body = JSON.stringify(buildSyntheticBody());
-                await conn.query(
-                    `INSERT INTO ${scheme.table}
-                     (timestamp, absoluteTimestamp, tenant, requestId, apiCall, method,
-                      requestBody, dateTime)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
-                    [
-                        Math.floor(Date.now() / 1000),
-                        Math.floor(Date.now() / 1000),
+            // Batch the inserts so the wall-clock time reflects MySQL's actual
+            // write cost rather than the network round-trip per row. With a
+            // remote DB, single-row INSERTs are completely dominated by RTT
+            // and hide the real per-scheme write penalty (FULLTEXT in
+            // particular).
+            const batchSize = Math.max(1, config.writeBatchSize);
+            for (let i = 0; i < config.writeIterations; i += batchSize) {
+                const rowsInBatch = Math.min(batchSize, config.writeIterations - i);
+                const placeholders: string[] = [];
+                const params: unknown[] = [];
+                const nowSec = Math.floor(Date.now() / 1000);
+                for (let j = 0; j < rowsInBatch; j++) {
+                    placeholders.push('(?, ?, ?, ?, ?, ?, ?, NOW())');
+                    params.push(
+                        nowSec,
+                        nowSec,
                         env.sampleTenant,
                         randomUUID(),
                         '/bench/insert',
                         'POST',
-                        body,
-                    ]
+                        JSON.stringify(buildSyntheticBody())
+                    );
+                }
+                await conn.query(
+                    `INSERT INTO ${scheme.table}
+                     (timestamp, absoluteTimestamp, tenant, requestId, apiCall, method,
+                      requestBody, dateTime)
+                     VALUES ${placeholders.join(', ')}`,
+                    params
                 );
-                if (i > 0 && i % 500 === 0) {
-                    log.sub(`  inserted ${i}/${config.writeIterations}`);
+                insertedSoFar += rowsInBatch;
+                // Light progress beacon every ~10% so long runs are visible.
+                if (insertedSoFar % Math.max(batchSize, Math.floor(config.writeIterations / 10)) === 0) {
+                    log.sub(`inserted ${insertedSoFar}/${config.writeIterations}`);
                 }
             }
         } catch (err) {
-            log.error(`Insert failed at iteration: ${(err as Error).message}`);
+            log.error(`Insert failed at iteration ${insertedSoFar}: ${(err as Error).message}`);
         }
         const elapsedMs = Date.now() - t0;
-        const insertsPerSec = config.writeIterations / (elapsedMs / 1000);
+        const actuallyInserted = insertedSoFar > 0 ? insertedSoFar : config.writeIterations;
+        const insertsPerSec = actuallyInserted / (elapsedMs / 1000);
 
         const [size] = await query<SizeRow>(
             `SELECT data_length, index_length
@@ -115,14 +135,17 @@ async function main(): Promise<void> {
     };
 
     const outDir = path.resolve(process.cwd(), 'reports');
-    const paths = await writeReport(report, outDir);
+    const paths = await writeReport(report, outDir, 'write');
     log.step('Write report written');
     log.sub(`Markdown: ${paths.md}`);
     log.sub(`JSON    : ${paths.json}`);
     log.sub(`CSV     : ${paths.csv}`);
 
     await closeConnection();
+    return report;
 }
+
+export { main as runWriteBenchmark };
 
 function buildSyntheticBody(): Record<string, unknown> {
     return {
@@ -183,8 +206,13 @@ async function snapshotEnv(): Promise<EnvSnapshot> {
     };
 }
 
-main().catch(err => {
-    log.error(err.message);
-    if (err.stack) console.error(err.stack);
-    process.exit(1);
-});
+// Only auto-run when invoked directly (e.g. `tsx src/benchWrite.ts`).
+// When imported by runAll.ts, the parent decides when to call us.
+import { fileURLToPath } from 'node:url';
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    main().catch(err => {
+        log.error(err.message);
+        if (err.stack) console.error(err.stack);
+        process.exit(1);
+    });
+}

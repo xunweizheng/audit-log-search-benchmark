@@ -31,7 +31,7 @@ interface CountRow {
     n: unknown;
 }
 
-async function main(): Promise<void> {
+async function main(): Promise<BenchReport> {
     log.step('Read benchmark');
 
     const env = await snapshotEnv();
@@ -89,14 +89,17 @@ async function main(): Promise<void> {
     };
 
     const outDir = path.resolve(process.cwd(), 'reports');
-    const paths = await writeReport(report, outDir);
-    log.step('Report written');
+    const paths = await writeReport(report, outDir, 'read');
+    log.step('Read report written');
     log.sub(`Markdown : ${paths.md}`);
     log.sub(`JSON     : ${paths.json}`);
     log.sub(`CSV      : ${paths.csv}`);
 
     await closeConnection();
+    return report;
 }
+
+export { main as runReadBenchmark };
 
 async function runOne(
     scheme: Scheme,
@@ -215,8 +218,13 @@ function truncate(s: string, n: number): string {
     return s.length <= n ? s : `${s.slice(0, n - 1)}…`;
 }
 
-main().catch(err => {
-    log.error(err.message);
-    if (err.stack) console.error(err.stack);
-    process.exit(1);
-});
+// Only auto-run when invoked directly (e.g. `tsx src/benchRead.ts`).
+// When imported by runAll.ts, the parent decides when to call us.
+import { fileURLToPath } from 'node:url';
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    main().catch(err => {
+        log.error(err.message);
+        if (err.stack) console.error(err.stack);
+        process.exit(1);
+    });
+}

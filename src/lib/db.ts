@@ -1,6 +1,7 @@
 import mysql, { Connection } from 'mysql2/promise';
 
 import { config } from './config.js';
+import { log } from './logger.js';
 
 let cached: Connection | null = null;
 
@@ -18,6 +19,23 @@ export async function getConnection(): Promise<Connection> {
         // Generous timeouts — benchmark queries can be long.
         connectTimeout: 30_000,
     });
+
+    // Make information_schema.tables size columns (data_length / index_length)
+    // reflect the current state instead of the 24-hour cached snapshot. Without
+    // this, the write benchmark reports "0 B" for sibling tables that were
+    // freshly created and immediately populated, because the cached statistics
+    // still show the table as empty.
+    //
+    // Best-effort: some managed MySQL services disallow SET SESSION on this
+    // variable. We log and continue if it fails.
+    try {
+        await cached.query('SET SESSION information_schema_stats_expiry = 0');
+    } catch (err) {
+        log.warn(
+            `Could not set information_schema_stats_expiry=0; storage numbers may be stale (${(err as Error).message})`
+        );
+    }
+
     return cached;
 }
 

@@ -1,0 +1,46 @@
+scheme_id,scheme_name,keyword_type,keyword,path,date_range,rows_matched,count,min_ms,max_ms,avg_ms,p50_ms,p95_ms,p99_ms
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),common,string,,all,2153,200,972.594,2783.542,1039.826,985.283,1103.668,2776.736
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),common,string,,7d,44,200,323.468,952.645,344.529,326.350,410.132,858.152
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),common,string,,24h,7,200,305.320,839.360,323.471,314.072,390.991,410.733
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),rare,campaign_engagement,,all,105,200,856.536,7053.258,922.405,869.019,991.292,1205.262
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),rare,campaign_engagement,,7d,7,200,309.244,834.067,325.449,317.310,384.001,434.269
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),rare,campaign_engagement,,24h,4,200,305.566,830.840,319.694,307.182,401.989,819.555
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),missing,d478f647-587f-47cc-8b7d-5d172b79f128,,all,0,200,852.890,1390.618,889.300,862.479,987.744,1376.696
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),missing,d478f647-587f-47cc-8b7d-5d172b79f128,,7d,0,200,316.004,846.723,334.466,318.502,391.159,837.498
+v1,v1: CAST(JSON AS CHAR) + LIKE (baseline),missing,d478f647-587f-47cc-8b7d-5d172b79f128,,24h,0,200,306.599,828.600,319.005,308.612,399.616,412.106
+v2,v2: JSON_SEARCH(),common,string,,all,2115,200,660.172,2794.387,907.998,860.982,1024.282,2653.140
+v2,v2: JSON_SEARCH(),common,string,,7d,35,200,313.820,863.451,338.043,316.924,409.599,439.529
+v2,v2: JSON_SEARCH(),common,string,,24h,1,200,306.877,412.889,316.212,308.423,385.423,411.408
+v2,v2: JSON_SEARCH(),rare,campaign_engagement,,all,18,200,678.432,1214.018,705.724,686.365,772.488,841.821
+v2,v2: JSON_SEARCH(),rare,campaign_engagement,,7d,0,200,313.580,854.729,329.795,316.174,409.058,427.347
+v2,v2: JSON_SEARCH(),rare,campaign_engagement,,24h,0,200,306.705,409.792,315.922,308.197,387.995,408.035
+v2,v2: JSON_SEARCH(),missing,d478f647-587f-47cc-8b7d-5d172b79f128,,all,0,200,676.972,1325.323,711.244,687.260,813.399,858.609
+v2,v2: JSON_SEARCH(),missing,d478f647-587f-47cc-8b7d-5d172b79f128,,7d,0,200,314.256,1144.515,365.068,316.407,452.335,1084.165
+v2,v2: JSON_SEARCH(),missing,d478f647-587f-47cc-8b7d-5d172b79f128,,24h,0,200,428.196,2479.398,535.916,438.456,1136.269,1201.490
+v3,v3: ->> path extract (no index),path-value,cb4a86a6-58cb-11f1-985c-ee8b41bccb2e,$.id,all,1,200,551.375,1995.749,632.966,566.806,1267.270,1984.960
+v3,v3: ->> path extract (no index),path-value,cb4a86a6-58cb-11f1-985c-ee8b41bccb2e,$.id,7d,1,200,308.471,1179.521,385.252,312.371,511.074,1169.883
+v3,v3: ->> path extract (no index),path-value,cb4a86a6-58cb-11f1-985c-ee8b41bccb2e,$.id,24h,1,200,305.974,843.189,330.075,308.112,410.095,843.187
+v3,v3: ->> path extract (no index),path-value,94ba7e72-2d32-4e5a-826c-3c56803e214f,$.orderId,all,0,200,430.274,962.049,443.799,435.682,468.368,526.934
+v3,v3: ->> path extract (no index),path-value,94ba7e72-2d32-4e5a-826c-3c56803e214f,$.orderId,7d,0,200,308.310,420.051,318.478,310.595,384.215,408.960
+v3,v3: ->> path extract (no index),path-value,94ba7e72-2d32-4e5a-826c-3c56803e214f,$.orderId,24h,0,200,306.165,410.999,324.525,308.230,407.722,410.822
+v3,v3: ->> path extract (no index),path-value,136,$.companyId,all,7,200,431.455,563.203,440.969,434.842,468.279,532.889
+v3,v3: ->> path extract (no index),path-value,136,$.companyId,7d,2,200,308.735,848.204,331.541,310.303,407.931,841.615
+v3,v3: ->> path extract (no index),path-value,136,$.companyId,24h,2,200,306.229,833.408,320.430,308.041,391.031,820.879
+v4,v4: Generated column + B-tree index,path-value,cb4a86a6-58cb-11f1-985c-ee8b41bccb2e,$.id,all,1,200,305.766,834.202,322.784,307.445,408.580,825.736
+v4,v4: Generated column + B-tree index,path-value,cb4a86a6-58cb-11f1-985c-ee8b41bccb2e,$.id,7d,1,200,305.445,897.819,328.479,307.642,409.789,883.714
+v4,v4: Generated column + B-tree index,path-value,cb4a86a6-58cb-11f1-985c-ee8b41bccb2e,$.id,24h,1,200,305.871,915.159,325.124,307.692,407.326,838.940
+v4,v4: Generated column + B-tree index,path-value,65ec4c39-9885-42b6-b8b1-b3db47cb6ca8,$.orderId,all,0,200,305.916,851.343,329.187,307.600,409.318,843.772
+v4,v4: Generated column + B-tree index,path-value,65ec4c39-9885-42b6-b8b1-b3db47cb6ca8,$.orderId,7d,0,200,305.655,920.019,326.013,307.444,408.139,837.272
+v4,v4: Generated column + B-tree index,path-value,65ec4c39-9885-42b6-b8b1-b3db47cb6ca8,$.orderId,24h,0,200,305.934,421.824,324.084,307.574,409.644,412.534
+v4,v4: Generated column + B-tree index,path-value,136,$.companyId,all,7,200,305.630,415.289,318.864,307.764,401.180,411.743
+v4,v4: Generated column + B-tree index,path-value,136,$.companyId,7d,2,200,305.445,844.042,320.270,307.273,403.757,819.958
+v4,v4: Generated column + B-tree index,path-value,136,$.companyId,24h,2,200,305.793,854.410,322.038,307.796,406.583,411.104
+v5,v5: Stringified column + FULLTEXT index,common,string,,all,2080,200,338.257,2865.375,411.906,344.122,662.973,2161.958
+v5,v5: Stringified column + FULLTEXT index,common,string,,7d,33,200,338.332,863.345,354.625,342.317,408.335,489.165
+v5,v5: Stringified column + FULLTEXT index,common,string,,24h,1,200,338.267,866.143,357.575,341.631,410.730,856.115
+v5,v5: Stringified column + FULLTEXT index,rare,campaign_engagement,,all,105,200,307.654,410.543,319.904,309.139,399.115,410.494
+v5,v5: Stringified column + FULLTEXT index,rare,campaign_engagement,,7d,7,200,307.164,847.874,324.286,308.782,389.497,841.332
+v5,v5: Stringified column + FULLTEXT index,rare,campaign_engagement,,24h,4,200,307.193,843.255,322.057,309.159,405.695,822.219
+v5,v5: Stringified column + FULLTEXT index,missing,d478f647-587f-47cc-8b7d-5d172b79f128,,all,0,200,306.689,866.851,331.114,308.422,410.071,841.286
+v5,v5: Stringified column + FULLTEXT index,missing,d478f647-587f-47cc-8b7d-5d172b79f128,,7d,0,200,306.774,410.247,317.712,308.500,398.824,409.361
+v5,v5: Stringified column + FULLTEXT index,missing,d478f647-587f-47cc-8b7d-5d172b79f128,,24h,0,200,306.718,922.868,321.218,308.281,387.730,892.608

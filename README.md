@@ -132,8 +132,15 @@ npm run teardown      # 5) (optional) drop sibling tables
 npm run all
 ```
 
-Reports land in `reports/run-<timestamp>.{md,json,csv}` and are
-intentionally committed so the run history stays reviewable.
+Reports land in `reports/run-<timestamp>-<phase>.{md,json,csv}` where
+`<phase>` is one of `read`, `write`, or `combined`:
+
+- `npm run bench:read`  → `run-<timestamp>-read.{md,json,csv}`
+- `npm run bench:write` → `run-<timestamp>-write.{md,json,csv}`
+- `npm run all`         → both of the above plus a merged
+  `run-<timestamp>-combined.{md,json,csv}` that contains both data sets.
+
+Reports are intentionally committed so the run history stays reviewable.
 
 ---
 
@@ -149,6 +156,7 @@ See `.env.example` for the canonical version. Key knobs:
 | `ITERATIONS` | Measured runs per query | `200` |
 | `WARMUP` | Warmup runs per query (discarded) | `5` |
 | `WRITE_ITERATIONS` | Inserts per scheme in the write benchmark | `2000` |
+| `WRITE_BATCH_SIZE` | Rows per multi-row INSERT; bigger = less network-bound | `50` |
 | `SAMPLE_TENANT` | Tenant to focus on. Empty = auto-pick the largest | (empty) |
 | `JSON_PATHS` | Paths used by v3 and v4 | `$.id,$.orderId,$.companyId` |
 | `KEYWORDS_COMMON`, `KEYWORDS_RARE`, `KEYWORDS_MISSING` | Override keyword auto-sampling | (auto) |

@@ -61,11 +61,26 @@ export interface OutputPaths {
     csv: string;
 }
 
-export async function writeReport(report: BenchReport, outDir: string): Promise<OutputPaths> {
+export type ReportPhase = 'read' | 'write' | 'combined';
+
+/**
+ * Write a benchmark report to disk as Markdown + JSON + CSV. The phase
+ * argument is appended to the filename so a single timestamp can carry
+ * multiple distinct reports without ambiguity:
+ *
+ *   reports/run-2026-05-27-19-46-30-read.md
+ *   reports/run-2026-05-27-19-46-30-write.md
+ *   reports/run-2026-05-27-19-46-30-combined.md
+ */
+export async function writeReport(
+    report: BenchReport,
+    outDir: string,
+    phase: ReportPhase
+): Promise<OutputPaths> {
     await mkdir(outDir, { recursive: true });
 
     const stamp = report.env.runStartedAt.replace(/[:T]/g, '-').replace(/\.\d+Z?$/, '').replace(/Z$/, '');
-    const base = path.join(outDir, `run-${stamp}`);
+    const base = path.join(outDir, `run-${stamp}-${phase}`);
 
     const paths: OutputPaths = {
         md: `${base}.md`,
@@ -78,6 +93,33 @@ export async function writeReport(report: BenchReport, outDir: string): Promise<
     await writeFile(paths.md, toMarkdown(report), 'utf8');
 
     return paths;
+}
+
+/**
+ * Merge a read report and a write report into a single combined report.
+ * The combined report uses the read report's env metadata as the baseline
+ * (read takes longer and is usually the more authoritative snapshot of
+ * `runStartedAt` / `runFinishedAt`), but pulls in the writes array and
+ * regenerates the auto-conclusion across both data sets.
+ */
+export function mergeReports(read: BenchReport, write: BenchReport): BenchReport {
+    const mergedReads = read.reads.length > 0 ? read.reads : write.reads;
+    const mergedWrites = write.writes.length > 0 ? write.writes : read.writes;
+    return {
+        env: {
+            ...read.env,
+            // Earliest start / latest finish across the two runs.
+            runStartedAt:
+                read.env.runStartedAt < write.env.runStartedAt ? read.env.runStartedAt : write.env.runStartedAt,
+            runFinishedAt:
+                read.env.runFinishedAt > write.env.runFinishedAt
+                    ? read.env.runFinishedAt
+                    : write.env.runFinishedAt,
+        },
+        reads: mergedReads,
+        writes: mergedWrites,
+        autoConclusion: buildAutoConclusion(mergedReads, mergedWrites),
+    };
 }
 
 // ---- CSV -------------------------------------------------------------------
